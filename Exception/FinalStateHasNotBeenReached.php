@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,29 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Exception;
+namespace {
+
+from('Hoa')
+
+/**
+ * \Hoa\Compiler\Exception
+ */
+-> import('Compiler.Exception.~');
+
+}
+
+namespace Hoa\Compiler\Exception {
 
 /**
  * Class \Hoa\Compiler\Exception\FinalStateHasNotBeenReached.
  *
  * Extending the \Hoa\Compiler\Exception class.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Ivan Enderlin.
  * @license    New BSD License
  */
-class FinalStateHasNotBeenReached extends Exception
-{
+
+class FinalStateHasNotBeenReached extends Exception { }
+
 }

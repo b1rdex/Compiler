@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,62 +34,64 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Rule;
+namespace {
 
-use Hoa\Compiler;
+from('Hoa')
+
+/**
+ * \Hoa\Compiler\Llk\Rule
+ */
+-> import('Compiler.Llk.Rule.~');
+
+}
+
+namespace Hoa\Compiler\Llk\Rule {
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Repetition.
  *
  * The repetition rule.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-class Repetition extends Rule
-{
+
+class Repetition extends Rule {
+
     /**
      * Minimum bound.
      *
-     * @var int
+     * @var \Hoa\Compiler\Llk\Rule\Repetition int
      */
-    protected $_min = 0;
+    protected $_min     = 0;
 
     /**
      * Maximum bound.
      *
-     * @var int
+     * @var \Hoa\Compiler\Llk\Rule\Repetition int
      */
-    protected $_max = 0;
+    protected $_max     = 0;
 
 
 
     /**
      * Constructor.
      *
-     * @param   string  $name        Name.
-     * @param   int     $min         Minimum bound.
-     * @param   int     $max         Maximum bound.
-     * @param   mixed   $children    Children.
-     * @param   string  $nodeId      Node ID.
+     * @access  public
+     * @param   string  $name       Name.
+     * @param   int     $min        Minimum bound.
+     * @param   int     $max        Maximum bound.
+     * @param   mixed   $content    Content.
+     * @param   string  $nodeId     Node ID.
+     * @return  void
      */
-    public function __construct($name, $min, $max, $children, $nodeId)
-    {
-        parent::__construct($name, $children, $nodeId);
+    public function __construct ( $name, $min, $max, $content, $nodeId ) {
 
-        $min = max(0, (int) $min);
-        $max = max(-1, (int) $max);
-
-        if (-1 !== $max && $min > $max) {
-            throw new Compiler\Exception\Rule(
-                'Cannot repeat with a min (%d) greater than max (%d).',
-                0,
-                [$min, $max]
-            );
-        }
-
-        $this->_min = $min;
-        $this->_max = $max;
+        parent::__construct($name, $content, $nodeId);
+        $this->_min    = $min;
+        $this->_max    = $max;
 
         return;
     }
@@ -97,30 +99,24 @@ class Repetition extends Rule
     /**
      * Get minimum bound.
      *
+     * @access  public
      * @return  int
      */
-    public function getMin()
-    {
+    public function getMin ( ) {
+
         return $this->_min;
     }
 
     /**
      * Get maximum bound.
      *
+     * @access  public
      * @return  int
      */
-    public function getMax()
-    {
+    public function getMax ( ) {
+
         return $this->_max;
     }
+}
 
-    /**
-     * Check whether the maximum repetition is unbounded.
-     *
-     * @return   bool
-     */
-    public function isInfinite()
-    {
-        return -1 === $this->getMax();
-    }
 }

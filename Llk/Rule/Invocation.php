@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,43 +34,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Rule;
+namespace Hoa\Compiler\Llk\Rule {
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Invocation.
  *
  * Parent of entry and ekzit rules.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-abstract class Invocation
-{
+
+abstract class Invocation {
+
     /**
      * Rule.
      *
-     * @var string
+     * @var \Hoa\Compiler\Llk\Rule\Invocation string
      */
     protected $_rule         = null;
 
     /**
      * Data.
      *
-     * @var mixed
+     * @var \Hoa\Compiler\Llk\Rule\Invocation mixed
      */
     protected $_data         = null;
 
     /**
      * Piece of todo sequence.
      *
-     * @var array
+     * @var \Hoa\Compiler\Llk\Rule\Invocation array
      */
     protected $_todo         = null;
 
     /**
      * Depth in the trace.
      *
-     * @var int
+     * @var \Hoa\Compiler\Llk\Rule\Invocation int
      */
     protected $_depth        = -1;
 
@@ -78,7 +81,7 @@ abstract class Invocation
      * Whether the rule is transitional or not (i.e. not declared in the grammar
      * but created by the analyzer).
      *
-     * @var bool
+     * @var \Hoa\Compiler\Llk\Rule\Invocation bool
      */
     protected $_transitional = false;
 
@@ -87,22 +90,21 @@ abstract class Invocation
     /**
      * Constructor.
      *
+     * @access  public
      * @param   string  $rule     Rule name.
      * @param   mixed   $data     Data.
      * @param   array   $todo     Todo.
      * @param   int     $depth    Depth.
+     * @return  void
      */
-    public function __construct(
-        $rule,
-        $data,
-        array $todo = null,
-        $depth      = -1
-    ) {
+    public function __construct ( $rule, $data, Array $todo = null,
+                                  $depth = -1 ) {
+
         $this->_rule         = $rule;
         $this->_data         = $data;
         $this->_todo         = $todo;
         $this->_depth        = $depth;
-        $this->_transitional = is_int($rule);
+        $this->_transitional = is_numeric($rule);
 
         return;
     }
@@ -110,41 +112,45 @@ abstract class Invocation
     /**
      * Get rule name.
      *
+     * @access  public
      * @return  string
      */
-    public function getRule()
-    {
+    public function getRule ( ) {
+
         return $this->_rule;
     }
 
     /**
      * Get data.
      *
+     * @access  public
      * @return  mixed
      */
-    public function getData()
-    {
+    public function getData ( ) {
+
         return $this->_data;
     }
 
     /**
      * Get todo sequence.
      *
+     * @access  public
      * @return  array
      */
-    public function getTodo()
-    {
+    public function getTodo ( ) {
+
         return $this->_todo;
     }
 
     /**
      * Set depth in trace.
      *
-     * @param   int  $depth    Depth.
+     * @access  public
+     * @parma   int  $depth    Depth.
      * @return  int
      */
-    public function setDepth($depth)
-    {
+    public function setDepth ( $depth) {
+
         $old          = $this->_depth;
         $this->_depth = $depth;
 
@@ -154,20 +160,24 @@ abstract class Invocation
     /**
      * Get depth in trace.
      *
+     * @access  public
      * @return  int
      */
-    public function getDepth()
-    {
+    public function getDepth ( ) {
+
         return $this->_depth;
     }
 
     /**
      * Check whether the rule is transitional or not.
      *
+     * @access  public
      * @return  bool
      */
-    public function isTransitional()
-    {
+    public function isTransitional ( ) {
+
         return $this->_transitional;
     }
+}
+
 }

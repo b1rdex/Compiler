@@ -6,7 +6,7 @@
 //
 // New BSD License
 //
-// Copyright © 2007-2017, Hoa community. All rights reserved.
+// Copyright © 2007-2012, Ivan Enderlin. All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
@@ -35,7 +35,8 @@
 //
 // Provide grammar for the LL(k) parser.
 //
-// @copyright  Copyright © 2007-2017, Hoa community.
+// @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+// @copyright  Copyright © 2007-2012 Ivan Enderlin.
 // @license    New BSD License
 //
 
@@ -57,7 +58,7 @@
 %token  kept_          <
 %token _kept           >
 %token  named          \(\)
-%token  node           #[a-zA-Z_][a-zA-Z0-9_]*(:[mM])?
+%token  node           #[a-zA-Z][a-zA-Z0-9]+
 
 %token  capturing_     \(
 %token _capturing      \)
@@ -84,6 +85,7 @@ simple:
   | ::kept_:: <token> ( ::unification_:: <unification> ::_unification:: )?
     ::_kept:: #kept
   | <token> ::named::
+    ( ::unification_:: <unification> ::_unification:: )? #named
 
 quantifier:
     <zero_or_one>

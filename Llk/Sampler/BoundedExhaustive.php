@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,11 +34,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Sampler;
+namespace {
 
-use Hoa\Compiler;
-use Hoa\Iterator;
-use Hoa\Visitor;
+from('Hoa')
+
+/**
+ * \Hoa\Compiler\Llk\Sampler
+ */
+-> import('Compiler.Llk.Sampler.~')
+
+/**
+ * \Hoa\Compiler\Llk\Sampler\Exception
+ */
+-> import('Compiler.Llk.Sampler.Exception')
+
+/**
+ * \Hoa\Compiler\Llk\Rule\Entry
+ */
+-> import('Compiler.Llk.Rule.Entry')
+
+/**
+ * \Hoa\Compiler\Llk\Rule\Ekzit
+ */
+-> import('Compiler.Llk.Rule.Ekzit');
+
+}
+
+namespace Hoa\Compiler\Llk\Sampler {
 
 /**
  * Class \Hoa\Compiler\Llk\Sampler\BoundedExhaustive.
@@ -48,43 +70,45 @@ use Hoa\Visitor;
  * This algorithm is based on multiset (set with repetition).
  * Repetition unfolding: upper bound of + and * is set to n.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-class BoundedExhaustive extends Sampler implements Iterator
-{
+class BoundedExhaustive extends Sampler implements \Hoa\Iterator {
+
     /**
      * Stack of rules to explore.
      *
-     * @var array
+     * @var \Hoa\Compiler\Llk\Sampler\BoundedExhaustive array
      */
     protected $_todo    = null;
 
     /**
      * Stack of rules that have already been covered.
      *
-     * @var array
+     * @var \Hoa\Compiler\Llk\Sampler\BoundedExhaustive array
      */
     protected $_trace   = null;
 
     /**
      * Current iterator key.
      *
-     * @var int
+     * @var \Hoa\Compiler\Llk\Sampler\BoundedExhaustive int
      */
     protected $_key     = -1;
 
     /**
      * Current iterator value.
      *
-     * @var string
+     * @var \Hoa\Compiler\Llk\Sampler\BoundedExhaustive string
      */
     protected $_current = null;
 
     /**
      * Bound.
      *
-     * @var int
+     * @var \Hoa\Compiler\Llk\Sampler\BoundedExhaustive int
      */
     protected $_length  = 5;
 
@@ -93,15 +117,15 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Construct a generator.
      *
+     * @access  public
      * @param   \Hoa\Compiler\Llk\Parser  $compiler        Compiler/parser.
      * @param   \Hoa\Visitor\Visit        $tokenSampler    Token sampler.
-     * @param   int                       $length          Max data length.
+     * @return  void
      */
-    public function __construct(
-        Compiler\Llk\Parser $compiler,
-        Visitor\Visit       $tokenSampler,
-        $length = 5
-    ) {
+    public function __construct ( \Hoa\Compiler\Llk\Parser $compiler,
+                                  \Hoa\Visitor\Visit       $tokenSampler,
+                                  $length = 5 ) {
+
         parent::__construct($compiler, $tokenSampler);
         $this->setLength($length);
 
@@ -111,49 +135,53 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Get the current iterator value.
      *
+     * @access  public
      * @return  string
      */
-    public function current()
-    {
+    public function current ( ) {
+
         return $this->_current;
     }
 
     /**
      * Get the current iterator key.
      *
+     * @access  public
      * @return  int
      */
-    public function key()
-    {
+    public function key ( ) {
+
         return $this->_key;
     }
 
     /**
      * Useless here.
      *
+     * @access  public
      * @return  void
      */
-    public function next()
-    {
+    public function next ( ) {
+
         return;
     }
 
     /**
      * Rewind the internal iterator pointer.
      *
+     * @access  public
      * @return  void
      */
-    public function rewind()
-    {
+    public function rewind ( ) {
+
         $ruleName       = $this->_rootRuleName;
         $this->_current = null;
         $this->_key     = -1;
-        $this->_trace   = [];
-        $handle         = new Compiler\Llk\Rule\Ekzit($ruleName, 0);
-        $this->_todo    = [
+        $this->_trace   = array();
+        $handle         = new \Hoa\Compiler\Llk\Rule\Ekzit($ruleName, 0);
+        $this->_todo    = array(
             $handle,
-            new Compiler\Llk\Rule\Entry($ruleName, 0, [$handle])
-        ];
+            new \Hoa\Compiler\Llk\Rule\Entry($ruleName, 0, array($handle))
+        );
 
         return;
     }
@@ -161,21 +189,19 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Compute the current iterator value, i.e. generate a new solution.
      *
+     * @access  public
      * @return  bool
      */
-    public function valid()
-    {
-        if (false === $this->unfold()) {
+    public function valid ( ) {
+
+        if(false === $this->unfold())
             return false;
-        }
 
         $handle = null;
 
-        foreach ($this->_trace as $trace) {
-            if ($trace instanceof Compiler\Llk\Rule\Token) {
+        foreach($this->_trace as $trace)
+            if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
                 $handle .= $this->generateToken($trace);
-            }
-        }
 
         ++$this->_key;
         $this->_current = $handle;
@@ -186,24 +212,26 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Unfold rules from the todo stack.
      *
+     * @access  protected
      * @return  bool
      */
-    protected function unfold()
-    {
-        while (0 < count($this->_todo)) {
+    protected function unfold ( ) {
+
+        while(0 < count($this->_todo)) {
+
             $pop = array_pop($this->_todo);
 
-            if ($pop instanceof Compiler\Llk\Rule\Ekzit) {
+            if($pop instanceof \Hoa\Compiler\Llk\Rule\Ekzit)
                 $this->_trace[] = $pop;
-            } else {
+            else {
+
                 $ruleName = $pop->getRule();
                 $next     = $pop->getData();
                 $rule     = $this->_rules[$ruleName];
                 $out      = $this->boundedExhaustive($rule, $next);
 
-                if (true !== $out && true !== $this->backtrack()) {
+                if(true !== $out && true !== $this->backtrack())
                     return false;
-                }
             }
         }
 
@@ -213,103 +241,127 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * The bounded-exhaustive algorithm.
      *
+     * @access  protected
      * @param   \Hoa\Compiler\Llk\Rule  $rule    Rule to cover.
      * @param   int                     $next    Next rule.
      * @return  bool
      */
-    protected function boundedExhaustive(Compiler\Llk\Rule $rule, $next)
-    {
-        $children = $rule->getChildren();
+    protected function boundedExhaustive ( \Hoa\Compiler\Llk\Rule $rule, $next ) {
 
-        if ($rule instanceof Compiler\Llk\Rule\Repetition) {
-            if (0 === $next) {
-                $this->_trace[] = new Compiler\Llk\Rule\Entry(
+        $content = $rule->getContent();
+
+        if($rule instanceof \Hoa\Compiler\Llk\Rule\Repetition) {
+
+            if(0 === $next) {
+
+                $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
                     $rule->getName(),
                     $rule->getMin()
                 );
 
                 array_pop($this->_todo);
-                $this->_todo[]  = new Compiler\Llk\Rule\Ekzit(
+                $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
                     $rule->getMin(),
                     $this->_todo
                 );
 
-                for ($i = 0, $min = $rule->getMin(); $i < $min; ++$i) {
-                    $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
-                        $children,
+                for($i = 0, $min = $rule->getMin(); $i < $min; ++$i) {
+
+                    $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                        $content,
                         0
                     );
-                    $this->_todo[] = new Compiler\Llk\Rule\Entry(
-                        $children,
+                    $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                        $content,
                         0
                     );
                 }
-            } else {
+            }
+            else {
+
                 $nbToken = 0;
 
-                foreach ($this->_trace as $trace) {
-                    if ($trace instanceof Compiler\Llk\Rule\Token) {
+                foreach($this->_trace as $trace)
+                    if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
                         ++$nbToken;
-                    }
-                }
 
                 $max = $rule->getMax();
 
-                if (-1 != $max && $next > $max) {
+                if(-1 != $max && $next > $max)
                     return false;
-                }
 
-                $this->_todo[] = new Compiler\Llk\Rule\Ekzit(
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
                     $rule->getName(),
                     $next,
                     $this->_todo
                 );
-                $this->_todo[] = new Compiler\Llk\Rule\Ekzit($children, 0);
-                $this->_todo[] = new Compiler\Llk\Rule\Entry($children, 0);
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                    $content,
+                    0
+                );
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $content,
+                    0
+                );
             }
 
             return true;
-        } elseif ($rule instanceof Compiler\Llk\Rule\Choice) {
-            if (count($children) <= $next) {
-                return false;
-            }
+        }
+        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Choice) {
 
-            $this->_trace[] = new Compiler\Llk\Rule\Entry(
+            if(count($content) <= $next)
+                return false;
+
+            $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
                 $rule->getName(),
                 $next,
                 $this->_todo
             );
-            $nextRule      = $children[$next];
-            $this->_todo[] = new Compiler\Llk\Rule\Ekzit($nextRule, 0);
-            $this->_todo[] = new Compiler\Llk\Rule\Entry($nextRule, 0);
+            $nextRule       = $content[$next];
+            $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                $nextRule,
+                0
+            );
+            $this->_todo[]  = new \Hoa\Compiler\Llk\Rule\Entry(
+                $nextRule,
+                0
+            );
 
             return true;
-        } elseif ($rule instanceof Compiler\Llk\Rule\Concatenation) {
-            $this->_trace[] = new Compiler\Llk\Rule\Entry(
+        }
+        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Concatenation) {
+
+            $this->_trace[] = new \Hoa\Compiler\Llk\Rule\Entry(
                 $rule->getName(),
                 $next
             );
 
-            for ($i = count($children) - 1; $i >= 0; --$i) {
-                $nextRule      = $children[$i];
-                $this->_todo[] = new Compiler\Llk\Rule\Ekzit($nextRule, 0);
-                $this->_todo[] = new Compiler\Llk\Rule\Entry($nextRule, 0);
+            for($i = count($content) - 1; $i >= 0; --$i) {
+
+                $nextRule      = $content[$i];
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Ekzit(
+                    $nextRule,
+                    0
+                );
+                $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
+                    $nextRule,
+                    0
+                );
             }
 
             return true;
-        } elseif ($rule instanceof Compiler\Llk\Rule\Token) {
+        }
+        elseif($rule instanceof \Hoa\Compiler\Llk\Rule\Token) {
+
             $nbToken = 0;
 
-            foreach ($this->_trace as $trace) {
-                if ($trace instanceof Compiler\Llk\Rule\Token) {
+            foreach($this->_trace as $trace)
+                if($trace instanceof \Hoa\Compiler\Llk\Rule\Token)
                     ++$nbToken;
-                }
-            }
 
-            if ($nbToken >= $this->getLength()) {
+            if($nbToken >= $this->getLength())
                 return false;
-            }
 
             $this->_trace[] = $rule;
             array_pop($this->_todo);
@@ -323,32 +375,37 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Backtrack to the previous choice-point.
      *
+     * @access  protected
      * @return  bool
      */
-    protected function backtrack()
-    {
+    protected function backtrack ( ) {
+
         $found = false;
 
         do {
+
             $last = array_pop($this->_trace);
 
-            if ($last instanceof Compiler\Llk\Rule\Entry) {
-                $rule  = $this->_rules[$last->getRule()];
-                $found = $rule instanceof Compiler\Llk\Rule\Choice;
-            } elseif ($last instanceof Compiler\Llk\Rule\Ekzit) {
-                $rule  = $this->_rules[$last->getRule()];
-                $found = $rule instanceof Compiler\Llk\Rule\Repetition;
-            }
-        } while (0 < count($this->_trace) && false === $found);
+            if($last instanceof \Hoa\Compiler\Llk\Rule\Entry) {
 
-        if (false === $found) {
+                $rule  = $this->_rules[$last->getRule()];
+                $found = $rule instanceof \Hoa\Compiler\Llk\Rule\Choice;
+            }
+            elseif($last instanceof \Hoa\Compiler\Llk\Rule\Ekzit) {
+
+                $rule  = $this->_rules[$last->getRule()];
+                $found = $rule instanceof \Hoa\Compiler\Llk\Rule\Repetition;
+            }
+
+        } while(0 < count($this->_trace) && false === $found);
+
+        if(false === $found)
             return false;
-        }
 
         $rule          = $last->getRule();
         $next          = $last->getData() + 1;
         $this->_todo   = $last->getTodo();
-        $this->_todo[] = new Compiler\Llk\Rule\Entry(
+        $this->_todo[] = new \Hoa\Compiler\Llk\Rule\Entry(
             $rule,
             $next,
             $this->_todo
@@ -360,19 +417,15 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Set upper-bound, the maximum data length.
      *
+     * @access  public
      * @param   int  $length    Length.
      * @return  int
-     * @throws  \Hoa\Compiler\Exception
      */
-    public function setLength($length)
-    {
-        if (0 >= $length) {
+    public function setLength ( $length ) {
+
+        if(0 >= $length)
             throw new Exception(
-                'Length must be greater than 0, given %d.',
-                0,
-                $length
-            );
-        }
+                'Length must be greater than 0, given %d.', 0, $length);
 
         $old           = $this->_length;
         $this->_length = $length;
@@ -383,10 +436,13 @@ class BoundedExhaustive extends Sampler implements Iterator
     /**
      * Get upper-bound.
      *
+     * @access  public
      * @return  int
      */
-    public function getLength()
-    {
+    public function getLength ( ) {
+
         return $this->_length;
     }
+}
+
 }

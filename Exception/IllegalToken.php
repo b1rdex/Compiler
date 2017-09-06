@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,22 +34,35 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Exception;
+namespace {
+
+from('Hoa')
+
+/**
+ * \Hoa\Compiler\Exception
+ */
+-> import('Compiler.Exception');
+
+}
+
+namespace Hoa\Compiler\Exception {
 
 /**
  * Class \Hoa\Compiler\Exception\IllegalToken.
  *
  * Extending the \Hoa\Compiler\Exception class.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Ivan Enderlin.
  * @license    New BSD License
  */
-class IllegalToken extends Exception
-{
+
+class IllegalToken extends Exception {
+
     /**
      * Column.
      *
-     * @var int
+     * @var \Hoa\Compiler\Exception\IllegalToken int
      */
     protected $column = 0;
 
@@ -58,14 +71,16 @@ class IllegalToken extends Exception
     /**
      * Override line and add column support.
      *
+     * @access  public
      * @param   string  $message    Formatted message.
      * @param   int     $code       Code (the ID).
      * @param   array   $arg        RaiseError string arguments.
      * @param   int     $line       Line.
      * @param   int     $column     Column.
+     * @return  void
      */
-    public function __construct($message, $code, $arg, $line, $column)
-    {
+    public function __construct ( $message, $code, $arg, $line, $column ) {
+
         parent::__construct($message, $code, $arg);
 
         $this->line   = $line;
@@ -77,10 +92,13 @@ class IllegalToken extends Exception
     /**
      * Get column.
      *
+     * @access  public
      * @return  int
      */
-    public function getColumn()
-    {
+    public function getColumn ( ) {
+
         return $this->column;
     }
+}
+
 }

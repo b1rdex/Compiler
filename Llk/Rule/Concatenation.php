@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,16 +34,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Rule;
+namespace {
+
+from('Hoa')
+
+/**
+ * \Hoa\Compiler\Llk\Rule
+ */
+-> import('Compiler.Llk.Rule.~');
+
+}
+
+namespace Hoa\Compiler\Llk\Rule {
 
 /**
  * Class \Hoa\Compiler\Llk\Rule\Concatenation.
  *
  * The concatenation rule.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-class Concatenation extends Rule
-{
+
+class Concatenation extends Rule { }
+
 }

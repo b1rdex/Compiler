@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,74 +34,74 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Llk\Rule;
-
-use Hoa\Consistency;
+namespace Hoa\Compiler\Llk\Rule {
 
 /**
  * Class \Hoa\Compiler\Llk\Rule.
  *
  * Rule parent.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Frédéric Dadeau <frederic.dadeau@femto-st.fr>
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Frédéric Dadeau, Ivan Enderlin.
  * @license    New BSD License
  */
-abstract class Rule
-{
+
+abstract class Rule {
+
     /**
      * Rule name.
      *
-     * @var string
+     * @var \Hoa\Compiler\Llk\Rule string
      */
     protected $_name           = null;
 
     /**
-     * Rule's children. Can be an array of names or a single name.
+     * Rule content.
      *
-     * @var mixed
+     * @var \Hoa\Compiler\Llk\Rule mixed
      */
-    protected $_children       = null;
+    protected $_content        = null;
 
     /**
      * Node ID.
      *
-     * @var string
+     * @var \Hoa\Compiler\Llk\Rule string
      */
     protected $_nodeId         = null;
 
     /**
      * Node options.
      *
-     * @var array
+     * @var \Hoa\Compiler\Llk\Rule array
      */
-    protected $_nodeOptions    = [];
+    protected $_nodeOptions    = array();
 
     /**
      * Default ID.
      *
-     * @var string
+     * @var \Hoa\Compiler\Llk\Rule string
      */
     protected $_defaultId      = null;
 
     /**
      * Default options.
      *
-     * @var array
+     * @var \Hoa\Compiler\Llk\Rule array
      */
-    protected $_defaultOptions = [];
+    protected $_defaultOptions = array();
 
     /**
      * For non-transitional rule: PP representation.
      *
-     * @var string
+     * @var \Hoa\Compiler\Llk\Rule string
      */
     protected $_pp             = null;
-
     /**
      * Whether the rule is transitional or not (i.e. not declared in the grammar
      * but created by the analyzer).
      *
-     * @var bool
+     * @var \Hoa\Compiler\Llk\Rule bool
      */
     protected $_transitional   = true;
 
@@ -110,14 +110,16 @@ abstract class Rule
     /**
      * Constructor.
      *
-     * @param   string  $name        Rule name.
-     * @param   mixed   $children    Children.
-     * @param   string  $nodeId      Node ID.
+     * @access  public
+     * @param   string  $name       Name.
+     * @param   mixed   $content    Content.
+     * @param   string  $nodeId     Node ID.
+     * @return  void
      */
-    public function __construct($name, $children, $nodeId = null)
-    {
+    public function __construct ( $name, $content, $nodeId = null ) {
+
         $this->setName($name);
-        $this->setChildren($children);
+        $this->setContent($content);
         $this->setNodeId($nodeId);
 
         return;
@@ -126,11 +128,12 @@ abstract class Rule
     /**
      * Set rule name.
      *
+     * @access  public
      * @param   string  $name    Rule name.
      * @return  string
      */
-    public function setName($name)
-    {
+    public function setName ( $name ) {
+
         $old         = $this->_name;
         $this->_name = $name;
 
@@ -140,53 +143,59 @@ abstract class Rule
     /**
      * Get rule name.
      *
+     * @access  public
      * @return  string
      */
-    public function getName()
-    {
+    public function getName ( ) {
+
         return $this->_name;
     }
 
     /**
-     * Set rule's children.
+     * Set rule content.
      *
-     * @param   mixed  $children    Children.
+     * @access  public
      * @return  mixed
      */
-    protected function setChildren($children)
-    {
-        $old             = $this->_children;
-        $this->_children = $children;
+    protected function setContent ( $content ) {
+
+        $old            = $this->_content;
+        $this->_content = $content;
 
         return $old;
     }
 
     /**
-     * Get rule's children.
+     * Get rule content.
      *
+     * @access  public
      * @return  mixed
      */
-    public function getChildren()
-    {
-        return $this->_children;
+    public function getContent ( ) {
+
+        return $this->_content;
     }
 
     /**
      * Set node ID.
      *
+     * @access  public
      * @param   string  $nodeId    Node ID.
      * @return  string
      */
-    public function setNodeId($nodeId)
-    {
+    public function setNodeId ( $nodeId ) {
+
         $old = $this->_nodeId;
 
-        if (false !== $pos = strpos($nodeId, ':')) {
+        if(false !== $pos = strpos($nodeId, ':')) {
+
             $this->_nodeId      = substr($nodeId, 0, $pos);
             $this->_nodeOptions = str_split(substr($nodeId, $pos + 1));
-        } else {
+        }
+        else {
+
             $this->_nodeId      = $nodeId;
-            $this->_nodeOptions = [];
+            $this->_nodeOptions = array();
         }
 
         return $old;
@@ -195,39 +204,45 @@ abstract class Rule
     /**
      * Get node ID.
      *
+     * @access  public
      * @return  string
      */
-    public function getNodeId()
-    {
+    public function getNodeId ( ) {
+
         return $this->_nodeId;
     }
 
     /**
      * Get node options.
      *
+     * @access  public
      * @retrun  array
      */
-    public function getNodeOptions()
-    {
+    public function getNodeOptions ( ) {
+
         return $this->_nodeOptions;
     }
 
     /**
      * Set default ID.
      *
+     * @access  public
      * @param   string  $defaultId    Default ID.
      * @return  string
      */
-    public function setDefaultId($defaultId)
-    {
+    public function setDefaultId ( $defaultId ) {
+
         $old = $this->_defaultId;
 
-        if (false !== $pos = strpos($defaultId, ':')) {
+        if(false !== $pos = strpos($defaultId, ':')) {
+
             $this->_defaultId      = substr($defaultId, 0, $pos);
             $this->_defaultOptions = str_split(substr($defaultId, $pos + 1));
-        } else {
+        }
+        else {
+
             $this->_defaultId      = $defaultId;
-            $this->_defaultOptions = [];
+            $this->_defaultOptions = array();
         }
 
         return $old;
@@ -236,31 +251,34 @@ abstract class Rule
     /**
      * Get default ID.
      *
+     * @access  public
      * @return  string
      */
-    public function getDefaultId()
-    {
+    public function getDefaultId ( ) {
+
         return $this->_defaultId;
     }
 
     /**
      * Get default options.
      *
+     * @access  public
      * @return  array
      */
-    public function getDefaultOptions()
-    {
+    public function getDefaultOptions ( ) {
+
         return $this->_defaultOptions;
     }
 
     /**
      * Set PP representation of the rule.
      *
+     * @access  public
      * @param   string  $pp    PP representation.
      * @return  string
      */
-    public function setPPRepresentation($pp)
-    {
+    public function setPPRepresentation ( $pp ) {
+
         $old                 = $this->_pp;
         $this->_pp           = $pp;
         $this->_transitional = false;
@@ -271,25 +289,24 @@ abstract class Rule
     /**
      * Get PP representation of the rule.
      *
+     * @access  public
      * @return  string
      */
-    public function getPPRepresentation()
-    {
+    public function getPPRepresentation ( ) {
+
         return $this->_pp;
     }
 
     /**
      * Check whether the rule is transitional or not.
      *
+     * @access  public
      * @return  bool
      */
-    public function isTransitional()
-    {
+    public function isTransitional ( ) {
+
         return $this->_transitional;
     }
 }
 
-/**
- * Flex entity.
- */
-Consistency::flexEntity('Hoa\Compiler\Llk\Rule\Rule');
+}

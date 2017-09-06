@@ -8,7 +8,7 @@
  *
  * New BSD License
  *
- * Copyright © 2007-2017, Hoa community. All rights reserved.
+ * Copyright © 2007-2013, Ivan Enderlin. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
@@ -34,127 +34,125 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-namespace Hoa\Compiler\Bin;
+namespace {
 
-use Hoa\Compiler;
-use Hoa\Consistency;
-use Hoa\Console;
-use Hoa\File;
+from('Hoa')
+
+/**
+ * \Hoa\Compiler\LLk
+ */
+-> import('Compiler.Llk.~')
+
+/**
+ * \Hoa\File\Read
+ */
+-> import('File.Read');
+
+}
+
+namespace Hoa\Compiler\Bin {
 
 /**
  * Class Hoa\Compiler\Bin\Pp.
  *
  * Play with PP.
  *
- * @copyright  Copyright © 2007-2017 Hoa community
+ * @author     Ivan Enderlin <ivan.enderlin@hoa-project.net>
+ * @copyright  Copyright © 2007-2013 Ivan Enderlin.
  * @license    New BSD License
  */
-class Pp extends Console\Dispatcher\Kit
-{
+
+class Pp extends \Hoa\Console\Dispatcher\Kit {
+
     /**
      * Options description.
      *
-     * @var array
+     * @var \Hoa\Compiler\Bin\Pp array
      */
-    protected $options = [
-        ['visitor',        Console\GetOption::REQUIRED_ARGUMENT, 'v'],
-        ['visitor-class',  Console\GetOption::REQUIRED_ARGUMENT, 'c'],
-        ['token-sequence', Console\GetOption::NO_ARGUMENT,       's'],
-        ['trace',          Console\GetOption::NO_ARGUMENT,       't'],
-        ['help',           Console\GetOption::NO_ARGUMENT,       'h'],
-        ['help',           Console\GetOption::NO_ARGUMENT,       '?']
-    ];
+    protected $options = array(
+        array('visitor',       \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'v'),
+        array('visitor-class', \Hoa\Console\GetOption::REQUIRED_ARGUMENT, 'c'),
+        array('trace',         \Hoa\Console\GetOption::NO_ARGUMENT,       't'),
+        array('help',          \Hoa\Console\GetOption::NO_ARGUMENT,       'h'),
+        array('help',          \Hoa\Console\GetOption::NO_ARGUMENT,       '?')
+    );
 
 
 
     /**
      * The entry method.
      *
+     * @access  public
      * @return  int
      */
-    public function main()
-    {
-        $visitor       = null;
-        $tokenSequence = false;
-        $trace         = false;
+    public function main ( ) {
 
-        while (false !== $c = $this->getOption($v)) {
-            switch ($c) {
-                case 'v':
-                    switch (strtolower($v)) {
-                        case 'dump':
-                            $visitor = 'Hoa\Compiler\Visitor\Dump';
+        $visitor = null;
+        $trace   = false;
 
-                            break;
+        while(false !== $c = $this->getOption($v)) switch($c) {
 
-                        default:
-                            return $this->usage();
-                    }
+            case 'v':
+                switch(strtolower($v)) {
 
-                    break;
+                    case 'dump':
+                        $visitor = 'Hoa\Compiler\Visitor\Dump';
+                      break;
 
-                case 'c':
-                    $visitor = str_replace('.', '\\', $v);
+                    default:
+                        return $this->usage();
+                }
+              break;
 
-                    break;
+            case 'c':
+                $visitor = str_replace('.', '\\', $v);
+              break;
 
-                case 's':
-                    $tokenSequence = true;
+            case 't':
+                $trace = true;
+              break;
 
-                    break;
+            case '__ambiguous':
+                $this->resolveOptionAmbiguity($v);
+              break;
 
-                case 't':
-                    $trace = true;
-
-                    break;
-
-                case '__ambiguous':
-                    $this->resolveOptionAmbiguity($v);
-
-                    break;
-
-                case 'h':
-                case '?':
-                default:
-                    return $this->usage();
-            }
+            case 'h':
+            case '?':
+            default:
+                return $this->usage();
+              break;
         }
 
         $this->parser->listInputs($grammar, $language);
 
-        if (empty($grammar) || (empty($language) && '0' !== $language)) {
+        if(empty($grammar) || (empty($language) && '0' !== $language))
             return $this->usage();
-        }
 
-        $compiler = Compiler\Llk::load(new File\Read($grammar));
-        $stream   = new File\Read($language);
-        $data     = $stream->readAll();
+        $compiler = \Hoa\Compiler\Llk::load(
+            new \Hoa\File\Read($grammar)
+        );
+        $data     = new \Hoa\File\Read($language);
 
         try {
-            $ast = $compiler->parse($data);
-        } catch (Compiler\Exception $e) {
-            if (true === $tokenSequence) {
-                $this->printTokenSequence($compiler, $data);
-                echo "\n\n";
-            }
 
+            $ast = $compiler->parse($data->readAll());
+        }
+        catch ( \Hoa\Compiler\Exception $e ) {
+
+            $this->printTrace($compiler);
             throw $e;
 
             return 1;
         }
 
-        if (true === $tokenSequence) {
-            $this->printTokenSequence($compiler, $data);
-            echo "\n\n";
-        }
+        if(true === $trace) {
 
-        if (true === $trace) {
             $this->printTrace($compiler);
-            echo "\n\n";
         }
 
-        if (null !== $visitor) {
-            $visitor = Consistency\Autoloader::dnew($visitor);
+        if(null !== $visitor) {
+
+            $visitor = dnew($visitor);
             echo $visitor->visit($ast);
         }
 
@@ -164,80 +162,22 @@ class Pp extends Console\Dispatcher\Kit
     /**
      * Print trace.
      *
+     * @access  protected
      * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
      * @return  void
      */
-    protected function printTrace(Compiler\Llk\Parser $compiler)
-    {
+    protected function printTrace ( \Hoa\Compiler\Llk\Parser $compiler ) {
+
         $i = 0;
 
-        foreach ($compiler->getTrace() as $element) {
-            if ($element instanceof Compiler\Llk\Rule\Entry) {
-                $ruleName = $element->getRule();
-                $rule     = $compiler->getRule($ruleName);
-
-                echo str_repeat('>  ', ++$i), 'enter ', $ruleName;
-
-                if (null !== $id = $rule->getNodeId()) {
-                    echo ' (', $id, ')';
-                }
-
-                echo "\n";
-            } elseif ($element instanceof Compiler\Llk\Rule\Token) {
-                echo
-                    str_repeat('   ', $i + 1),
-                    'token ', $element->getTokenName(),
+        foreach($compiler->getTrace() as $element)
+            if($element instanceof \Hoa\Compiler\Llk\Rule\Entry)
+                echo str_repeat('>  ', ++$i), 'enter ', $element->getRule(), "\n";
+            elseif($element instanceof \Hoa\Compiler\Llk\Rule\Token)
+                echo str_repeat('   ', $i + 1), 'token ',$element->getTokenName(),
                     ', consumed ', $element->getValue(), "\n";
-            } else {
-                echo
-                    str_repeat('<  ', $i--),
-                   'ekzit ', $element->getRule(), "\n";
-            }
-        }
-
-        return;
-    }
-
-    /**
-     * Print token sequence.
-     *
-     * @param   \Hoa\Compiler\Llk\Parser  $compiler    Compiler.
-     * @param   string                    $data        Data to lex.
-     * @return  void
-     */
-    protected function printTokenSequence(Compiler\Llk\Parser $compiler, $data)
-    {
-        $lexer    = new Compiler\Llk\Lexer();
-        $sequence = $lexer->lexMe($data, $compiler->getTokens());
-        $format   = '%' . (strlen((string) count($sequence)) + 1) . 's  ' .
-                    '%-13s %-20s  %s  %6s' . "\n";
-
-        $header = sprintf(
-            $format,
-            '#',
-            'namespace',
-            'token name',
-            'token value                   ',
-            'offset'
-        );
-
-        echo $header, str_repeat('-', strlen($header)), "\n";
-
-        foreach ($sequence as $i => $token) {
-            printf(
-                $format,
-                $i,
-                $token['namespace'],
-                $token['token'],
-                30 < $token['length']
-                    ? mb_substr($token['value'], 0, 29) . '…'
-                    : 'EOF' === $token['token']
-                        ? str_repeat(' ', 30)
-                        : $token['value'] .
-                          str_repeat(' ', 30 - $token['length']),
-                $token['offset']
-            );
-        }
+            else
+                echo str_repeat('<  ', $i--), 'ekzit ', $element->getRule(), "\n";
 
         return;
     }
@@ -245,23 +185,24 @@ class Pp extends Console\Dispatcher\Kit
     /**
      * The command usage.
      *
+     * @access  public
      * @return  int
      */
-    public function usage()
-    {
-        echo
-            'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",
-            'Options :', "\n",
-            $this->makeUsageOptionsList([
-                'v'    => 'Visitor name (only “dump” is supported).',
-                'c'    => 'Visitor classname (using . instead of \ works).',
-                's'    => 'Print token sequence.',
-                't'    => 'Print trace.',
-                'help' => 'This help.'
-            ]), "\n";
+    public function usage ( ) {
+
+        echo 'Usage   : compiler:pp <options> [grammar.pp] [language]', "\n",
+             'Options :', "\n",
+             $this->makeUsageOptionsList(array(
+                 'v'    => 'Visitor name (only “dump” is supported).',
+                 'c'    => 'Visitor classname (using . instead of \ works).',
+                 't'    => 'Print trace.',
+                 'help' => 'This help.'
+             )), "\n";
 
         return;
     }
+}
+
 }
 
 __halt_compiler();
